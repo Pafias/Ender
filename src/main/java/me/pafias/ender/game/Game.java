@@ -509,7 +509,7 @@ public class Game {
             lobbyObjective.getScore(CC.translate("&5Players:")).setScore(4);
             lobbyObjective.getScore(ChatColor.GRAY + "").setScore(3);
             lobbyObjective.getScore("").setScore(2);
-            lobbyObjective.getScore(CC.translate("&6play.amsero.tk")).setScore(1);
+            lobbyObjective.getScore(CC.translate("&6not cubecraft")).setScore(1);
             getEveryone().forEach(p -> Schedulers.async().run(() -> p.getPlayer().setScoreboard(lobbyScoreboard)));
         }, 2, TimeUnit.MILLISECONDS, 1, TimeUnit.SECONDS));
     }
@@ -528,7 +528,7 @@ public class Game {
             gameObjective.getScore(CC.translate("&5Humans:")).setScore(4);
             gameObjective.getScore(ChatColor.BLUE + "").setScore(3);
             gameObjective.getScore("").setScore(2);
-            gameObjective.getScore(CC.translate("&6play.amsero.tk")).setScore(1);
+            gameObjective.getScore(CC.translate("&6not cubecraft")).setScore(1);
             everyone.forEach(user -> Schedulers.async().run(() -> user.getPlayer().setScoreboard(gameScoreboard)));
         }, 2, TimeUnit.MILLISECONDS, 1, TimeUnit.SECONDS));
     }
