@@ -1,0 +1,80 @@
+no_permission: '&cYou do not have permission to do this.'
+help:
+  - '/ender'
+hub:
+  world: 'world'
+  x: 0
+  y: 70
+  z: 0
+  yaw: 0
+  pitch: 0
+lobby:
+  world: 'ender_lobby'
+  x: -995.51
+  y: 12
+  z: 7.47
+  yaw: -0.05
+  pitch: 0.11
+min_players: 2
+max_players: 20
+gameworld: 'ender_game'
+gameduration: 1200
+total_pages: 10
+teleport_cooldown_seconds: 20
+freeze_cooldown_seconds: 30
+playersspawnlocation:
+  world: 'ender_game'
+  x: 1963.5
+  y: 11
+  z: -39.47
+  yaw: -359.23
+  pitch: -0.94
+pages:
+  - '1982.0,18.0,8.0,NORTH'
+  - '1974.0,18.0,8.0,EAST'
+  - '1973.0,18.0,-6.0,SOUTH'
+sounds:
+  effect:
+    - 'custom.effect.chains0'
+    - 'custom.effect.chains1'
+    - 'custom.effect.chains2'
+    - 'custom.effect.chains3'
+    - 'custom.effect.chains4'
+    - 'custom.effect.creepy0'
+    - 'custom.effect.creepy1'
+    - 'custom.effect.helpme'
+    - 'custom.effect.hurts'
+    - 'custom.effect.intro'
+    - 'custom.effect.laugh0'
+    - 'custom.effect.laugh1'
+    - 'custom.effect.laugh2'
+    - 'custom.effect.laugh3'
+    - 'custom.effect.laugh4'
+    - 'custom.effect.laugh5'
+    - 'custom.effect.laughlong'
+    - 'custom.effect.piano'
+    - 'custom.effect.saveme'
+    - 'custom.effect.scream0'
+    - 'custom.effect.scream1'
+    - 'custom.effect.static0'
+    - 'custom.effect.static1'
+    - 'custom.effect.static2'
+    - 'custom.effect.static3'
+    - 'custom.effect.static4'
+  ambient:
+    - 'custom.ambient.a0'
+    - 'custom.ambient.a1'
+    - 'custom.ambient.a2'
+    - 'custom.ambient.a3'
+    - 'custom.ambient.a4'
+    - 'custom.ambient.a5'
+    - 'custom.ambient.a6'
+    - 'custom.ambient.a7'
+    - 'custom.ambient.a8'
+    - 'custom.ambient.a9'
+    - 'custom.ambient.a10'
+    - 'custom.ambient.a11'
+    - 'custom.ambient.a12'
+    - 'custom.ambient.a13'
+    - 'custom.ambient.b0'
+    - 'custom.ambient.c0'

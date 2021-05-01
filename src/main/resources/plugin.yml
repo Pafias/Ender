@@ -1,0 +1,12 @@
+name: Ender
+version: ${project.version}
+main: me.pafias.ender.Ender
+depend: [ helper ]
+authors: [ Pafias ]
+description: CubeCraft Ender Remake
+api-version: 1.16
+commands:
+  ender:
+    usage: /ender
+    aliases: [slender]
+    description: Ender
