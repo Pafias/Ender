@@ -73,28 +73,6 @@ public class EnderListener implements Listener {
                                     Schedulers.async().runLater(() -> {
                                         tpCooldown.remove(user.getPlayer().getUniqueId());
                                     }, plugin.getSM().getVariables().teleportCooldownSeconds * 20L);
-                                    /*
-                                    game.getPlayers().stream().filter(u -> u != user).forEach(u -> {
-                                        double nX;
-                                        double nZ;
-                                        float nang = u.getPlayer().getLocation().getYaw() + 90;
-                                        if (nang < 0)
-                                            nang += 360;
-                                        nX = Math.cos(Math.toRadians(nang));
-                                        nZ = Math.sin(Math.toRadians(nang));
-                                        Location loc = new Location(u.getPlayer().getLocation().getWorld(),
-                                                u.getPlayer().getLocation().getX() - nX,
-                                                u.getPlayer().getLocation().getY(),
-                                                u.getPlayer().getLocation().getZ() - nZ,
-                                                u.getPlayer().getLocation().getYaw(),
-                                                u.getPlayer().getLocation().getPitch());
-                                        user.getPlayer().teleport(loc);
-                                        tpCooldown.put(user.getPlayer().getUniqueId(), System.currentTimeMillis());
-                                        Schedulers.async().runLater(() -> {
-                                            tpCooldown.remove(user.getPlayer().getUniqueId());
-                                        }, plugin.getSM().getVariables().teleportCooldownSeconds * 20L);
-                                    });
-                                     */
                                 }
             }
     }

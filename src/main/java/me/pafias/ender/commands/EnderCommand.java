@@ -37,6 +37,7 @@ public class EnderCommand implements CommandExecutor {
             sender.sendMessage(CC.translate("&9/" + label + " join &f- Join a game"));
             sender.sendMessage(CC.translate("&9/" + label + " create &f- Create a game"));
             sender.sendMessage(CC.translate("&9/" + label + " setender &f- Set the ender for the game"));
+            sender.sendMessage(CC.translate("&9/" + label + " setflashlightlevel &f- Set the ender for the game"));
         } else {
             plugin.getSM().getVariables().help.forEach(s -> sender.sendMessage(CC.translate(s)));
         }

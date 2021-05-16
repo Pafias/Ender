@@ -150,7 +150,7 @@ public class Game {
                          */
                         p.getPlayer().sendMessage(ChatColor.GOLD + "You are the " + ChatColor.AQUA + "Ender!");
                         p.getPlayer().sendMessage(ChatColor.GOLD
-                                + "Hunt down players and murder them with your scythe! Use the abilities in your hotbar to help you.");
+                                + "Hunt down players and murder them by looking at them! Use the abilities in your hotbar to help you.");
                         p.getPlayer().setExp(0);
                         p.getPlayer().setLevel(0);
                     } else {
@@ -386,7 +386,7 @@ public class Game {
              */
             for (int i = 0; i < 5; i++) {
                 try {
-                    Location loc = RandomUtils.getRandom(pagesLocation.keySet());
+                    Location loc = RandomSelector.uniform(pagesLocation.keySet()).pick();
                     BlockFace face = pagesLocation.get(loc);
                     ItemFrame frame = world.spawn(loc, ItemFrame.class, itemFrame -> {
                         itemFrame.setFacingDirection(face, true);
@@ -509,7 +509,7 @@ public class Game {
             lobbyObjective.getScore(CC.translate("&5Players:")).setScore(4);
             lobbyObjective.getScore(ChatColor.GRAY + "").setScore(3);
             lobbyObjective.getScore("").setScore(2);
-            lobbyObjective.getScore(CC.translate("&6not cubecraft")).setScore(1);
+            lobbyObjective.getScore(CC.translate("&6play.cubecraft.net")).setScore(1);
             getEveryone().forEach(p -> Schedulers.async().run(() -> p.getPlayer().setScoreboard(lobbyScoreboard)));
         }, 2, TimeUnit.MILLISECONDS, 1, TimeUnit.SECONDS));
     }
@@ -528,7 +528,7 @@ public class Game {
             gameObjective.getScore(CC.translate("&5Humans:")).setScore(4);
             gameObjective.getScore(ChatColor.BLUE + "").setScore(3);
             gameObjective.getScore("").setScore(2);
-            gameObjective.getScore(CC.translate("&6not cubecraft")).setScore(1);
+            gameObjective.getScore(CC.translate("&6play.cubecraft.net")).setScore(1);
             everyone.forEach(user -> Schedulers.async().run(() -> user.getPlayer().setScoreboard(gameScoreboard)));
         }, 2, TimeUnit.MILLISECONDS, 1, TimeUnit.SECONDS));
     }

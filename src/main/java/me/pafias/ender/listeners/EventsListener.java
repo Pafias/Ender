@@ -4,6 +4,7 @@ import me.pafias.ender.Ender;
 import me.pafias.ender.User;
 import me.pafias.ender.game.Game;
 import org.bukkit.GameMode;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -96,7 +97,7 @@ public class EventsListener implements Listener {
 
     @EventHandler
     public void onChange(PlayerInteractAtEntityEvent event) {
-        if (event.getRightClicked() instanceof ItemFrame)
+        if (event.getRightClicked() instanceof ItemFrame || event.getRightClicked() instanceof ArmorStand)
             event.setCancelled(true);
     }
 

@@ -79,7 +79,6 @@ public class GameManager {
         }
         if (!user.getPlayer().hasResourcePack())
             user.getPlayer().setResourcePack("https://www.dropbox.com/s/b74jwhgywl9cc2v/CubeCraft-Ender-Pack.zip?dl=1");
-        // user.getPlayer().setResourcePack("http://pafias.sytes.net/CubeCraft-Ender-Pack.zip");
     }
 
     public void addPlayer(User user) {

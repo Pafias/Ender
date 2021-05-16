@@ -1,5 +1,6 @@
 package me.pafias.ender.utils;
 
+import me.lucko.helper.random.RandomSelector;
 import me.pafias.ender.Ender;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -9,23 +10,12 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.io.File;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RandomUtils {
-
-    public static <T> T getRandom(List<T> list) {
-        Random random = new Random();
-        T object = list.get(random.nextInt(list.size()));
-        return object;
-    }
-
-    public static <T> T getRandom(Set<T> set) {
-        List<T> list = new ArrayList<>(set);
-        Random random = new Random();
-        T object = list.get(random.nextInt(list.size()));
-        return object;
-    }
 
     public static String getRandomAmbientSound() {
         Random random = new Random();
@@ -57,20 +47,14 @@ public class RandomUtils {
     }
 
     public static String getRandomEffectSound(List<String> sounds) {
-        Random random = new Random();
-        List<String> list = sounds.stream().filter(s -> !s.equalsIgnoreCase("custom.effect.intro")).collect(Collectors.toList());
-        String sound = list.get(random.nextInt(list.size()));
-        return sound;
+        return RandomSelector.uniform(sounds.stream().filter(s -> !s.equalsIgnoreCase("custom.effect.intro")).collect(Collectors.toList())).pick();
     }
 
     public static File getRandomPage() {
-        Random random = new Random();
-        int index = random.nextInt(9);
-        File file = new File(Ender.get().getDataFolder() + "/pages/", "page" + index + ".png");
-        return file;
+        return new File(Ender.get().getDataFolder() + "/pages/", "page" + new Random().nextInt(9) + ".png");
     }
 
-    public static ItemStack getSkull(UUID skin){
+    public static ItemStack getSkull(UUID skin) {
         ItemStack skull = new ItemStack(Material.LEGACY_SKULL_ITEM, 1);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
         meta.setOwningPlayer(Ender.get().getServer().getOfflinePlayer(skin));
