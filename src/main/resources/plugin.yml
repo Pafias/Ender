@@ -1,0 +1,12 @@
+name: Ender
+version: '${project.version}'
+main: me.pafias.ender.Ender
+api-version: 1.15
+authors: [ Pafias ]
+description: Ender Halloween Minigame
+commands:
+  ender:
+    usage: /ender [subcommand]
+    aliases: []
+    description: Ender main command
+    permission: ender
