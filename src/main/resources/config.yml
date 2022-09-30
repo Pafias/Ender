@@ -1,0 +1,29 @@
+games: 2
+
+max_players: 10
+
+game_duration_minutes: 30
+
+server_lobby:
+  world: 'world'
+  x: -214.5
+  y: 14.0
+  z: -167.5
+  yaw: 180.0
+  pitch: 0.0
+
+game_lobby:
+  world: 'ender_lobby'
+  x: -995.5
+  y: 12.0
+  z: 7.5
+  yaw: 0.0
+  pitch: 0.0
+
+game_spawn:
+  world: 'ender_game'
+  x: 1971.5
+  y: 11.0
+  z: -38.5
+  yaw: 0.0
+  pitch: 0.0
