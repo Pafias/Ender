@@ -8,7 +8,7 @@ public class ServicesManager {
 
     public ServicesManager(Ender plugin) {
         variables = new Variables(plugin);
-        playerManager = new PlayerManager();
+        playerManager = new PlayerManager(plugin);
         gameManager = new GameManager(plugin);
     }
 

@@ -11,6 +11,7 @@ public class EnderPlayer {
 
     private boolean ender;
     private Torch torch;
+    private boolean frozen;
 
     public EnderPlayer(Player player) {
         this.player = player;
@@ -45,4 +46,11 @@ public class EnderPlayer {
         this.torch = torch;
     }
 
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
+    }
 }

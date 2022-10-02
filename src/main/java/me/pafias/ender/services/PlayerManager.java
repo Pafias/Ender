@@ -1,5 +1,6 @@
 package me.pafias.ender.services;
 
+import me.pafias.ender.Ender;
 import me.pafias.ender.objects.EnderPlayer;
 import org.bukkit.entity.Player;
 
@@ -9,8 +10,10 @@ import java.util.UUID;
 
 public class PlayerManager {
 
-    public PlayerManager() {
+    private final Ender plugin;
 
+    public PlayerManager(Ender plugin) {
+        this.plugin = plugin;
     }
 
     private final Set<EnderPlayer> players = new HashSet<>();
@@ -38,6 +41,7 @@ public class PlayerManager {
 
     public void removePlayer(Player player) {
         EnderPlayer p = getPlayer(player);
+        plugin.getSM().getGameManager().removePlayer(p);
         players.remove(p);
     }
 

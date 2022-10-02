@@ -7,10 +7,10 @@ import me.pafias.ender.util.CC;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class ForcestartCommand extends ICommand {
+public class StopCommand extends ICommand {
 
-    public ForcestartCommand() {
-        super("forcestart", "ender.forcestart", "fs");
+    public StopCommand() {
+        super("stop", "ender.stop");
     }
 
     @Override
@@ -20,7 +20,7 @@ public class ForcestartCommand extends ICommand {
 
     @Override
     public String getDescription() {
-        return "Force-start the game";
+        return "Stop the game";
     }
 
     @Override
@@ -35,9 +35,8 @@ public class ForcestartCommand extends ICommand {
             sender.sendMessage(CC.t("&cYou are not in a game!"));
             return;
         }
-        game.cancelTask("start");
-        game.start();
-        sender.sendMessage(CC.t("&aGame force-started!"));
+        game.stop();
+        sender.sendMessage(CC.t("&aGame stopped!"));
     }
 
 }

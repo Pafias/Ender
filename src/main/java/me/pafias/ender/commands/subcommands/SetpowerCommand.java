@@ -7,10 +7,10 @@ import me.pafias.ender.util.CC;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class ForcestartCommand extends ICommand {
+public class SetpowerCommand extends ICommand {
 
-    public ForcestartCommand() {
-        super("forcestart", "ender.forcestart", "fs");
+    public SetpowerCommand() {
+        super("setpower", "ender.setpower", "settorchpower");
     }
 
     @Override
@@ -20,7 +20,7 @@ public class ForcestartCommand extends ICommand {
 
     @Override
     public String getDescription() {
-        return "Force-start the game";
+        return "Set your torch power level";
     }
 
     @Override
@@ -29,15 +29,23 @@ public class ForcestartCommand extends ICommand {
             sender.sendMessage(CC.t("&cOnly players!"));
             return;
         }
+        double power = 100;
+        if (args.length >= 2)
+            try {
+                power = Double.parseDouble(args[1]);
+            } catch (NumberFormatException ex) {
+                sender.sendMessage(CC.t("&cInvalid amount."));
+                return;
+            }
         EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer((Player) sender);
         Game game = plugin.getSM().getGameManager().getGame(player);
         if (game == null) {
             sender.sendMessage(CC.t("&cYou are not in a game!"));
             return;
         }
-        game.cancelTask("start");
-        game.start();
-        sender.sendMessage(CC.t("&aGame force-started!"));
+        if (player.getTorch() != null)
+            player.getTorch().setPower(power);
+        sender.sendMessage(CC.t("&aTorch power changed."));
     }
 
 }

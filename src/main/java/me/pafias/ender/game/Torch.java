@@ -54,7 +54,8 @@ public class Torch {
                 player.getPlayer().removePotionEffect(PotionEffectType.BLINDNESS);
             }
         } else {
-            task.cancel();
+            if (task != null)
+                task.cancel();
             currentItem = offItem;
             player.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0, false, false));
         }
@@ -80,6 +81,10 @@ public class Torch {
 
     public boolean isEmpty() {
         return power <= 0;
+    }
+
+    public void setPower(double power) {
+        this.power = power;
     }
 
 }

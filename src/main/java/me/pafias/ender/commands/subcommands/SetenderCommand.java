@@ -2,15 +2,16 @@ package me.pafias.ender.commands.subcommands;
 
 import me.pafias.ender.commands.ICommand;
 import me.pafias.ender.game.Game;
+import me.pafias.ender.game.GameState;
 import me.pafias.ender.objects.EnderPlayer;
 import me.pafias.ender.util.CC;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class ForcestartCommand extends ICommand {
+public class SetenderCommand extends ICommand {
 
-    public ForcestartCommand() {
-        super("forcestart", "ender.forcestart", "fs");
+    public SetenderCommand() {
+        super("setender", "ender.setender", "ender");
     }
 
     @Override
@@ -20,7 +21,7 @@ public class ForcestartCommand extends ICommand {
 
     @Override
     public String getDescription() {
-        return "Force-start the game";
+        return "Set the ender";
     }
 
     @Override
@@ -35,9 +36,21 @@ public class ForcestartCommand extends ICommand {
             sender.sendMessage(CC.t("&cYou are not in a game!"));
             return;
         }
-        game.cancelTask("start");
-        game.start();
-        sender.sendMessage(CC.t("&aGame force-started!"));
+        if(!game.getState().equals(GameState.LOBBY)){
+            sender.sendMessage(CC.t("&cYou can only do that when the game hasn't started yet!"));
+            return;
+        }
+        if (plugin.getServer().getPlayer(args[1]) == null) {
+            sender.sendMessage(CC.t("&cPlayer not found!"));
+            return;
+        }
+        EnderPlayer target = plugin.getSM().getPlayerManager().getPlayer(args[1]);
+        if (!game.getPlayers().contains(target)) {
+            sender.sendMessage(CC.t("&cThat player is not in this game!"));
+            return;
+        }
+        game.setEnder(target);
+        sender.sendMessage(CC.t("&aEnder set."));
     }
 
 }

@@ -55,7 +55,8 @@ public class Sound {
     }
 
     public void stopPlaying(Player player) {
-        player.stopAllSounds();
+        for (int i = 0; i < amount; i++)
+            player.stopSound(name + i);
         playing.remove(player);
     }
 

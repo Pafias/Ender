@@ -1,7 +1,9 @@
 package me.pafias.ender.commands;
 
 import me.pafias.ender.Ender;
+import me.pafias.ender.commands.subcommands.AddpagelocationCommand;
 import me.pafias.ender.commands.subcommands.ForcestartCommand;
+import me.pafias.ender.commands.subcommands.StopCommand;
 import me.pafias.ender.util.CC;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,6 +19,8 @@ public class EnderCommand implements CommandExecutor {
     public EnderCommand(Ender plugin) {
         this.plugin = plugin;
         commands.add(new ForcestartCommand());
+        commands.add(new AddpagelocationCommand());
+        commands.add(new StopCommand());
     }
 
     private Set<ICommand> commands = new HashSet<>();

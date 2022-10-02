@@ -7,6 +7,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,8 +19,13 @@ public class GameManager {
 
     public GameManager(Ender plugin) {
         this.plugin = plugin;
-        for (int i = 0; i < plugin.getSM().getVariables().games; i++)
-            createGame();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < plugin.getSM().getVariables().games; i++)
+                    createGame();
+            }
+        }.runTaskLaterAsynchronously(plugin, 3 * 20);
     }
 
     private final Set<Game> games = new HashSet<>();
@@ -37,13 +43,17 @@ public class GameManager {
     }
 
     public Game getGame(World world) {
-        return games.stream().filter(game -> game.getWorld().getGameWorld() == world).findAny().orElse(null);
+        return games.stream().filter(game -> game.getWorld().getGameWorld().getName().equalsIgnoreCase(world.getName())).findAny().orElse(null);
+    }
+
+    public Game getGame(EnderPlayer player) {
+        return games.stream().filter(game -> game.getPlayers().contains(player)).findAny().orElse(null);
     }
 
     public void createGame() {
         try {
-            Game p = new Game();
-            games.add(p);
+            Game game = new Game();
+            games.add(game);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -64,12 +74,14 @@ public class GameManager {
         p.getInventory().clear();
         p.setLevel(0);
         p.setExp(0);
-        p.teleport(plugin.getSM().getVariables().gameLobby);
+        p.teleport(game.getLobby().getGameWorld().getSpawnLocation());
         p.setGameMode(GameMode.ADVENTURE);
         p.getInventory().clear();
         p.setHealth(p.getMaxHealth());
         p.setFoodLevel(20);
         game.addPlayer(player);
+        if (!p.hasResourcePack())
+            p.setResourcePack("https://www.dropbox.com/s/b74jwhgywl9cc2v/CubeCraft-Ender-Pack.zip?dl=1");
         if (game.getPlayers().size() >= 2) {
             if (!game.getCountdownTasks().containsKey("start")) {
                 game.getCountdownTasks().put("start", new Countdown(plugin, 15, () -> {
@@ -79,11 +91,11 @@ public class GameManager {
                             game.start();
                         },
                         (t) -> {
-                            game.broadcastf("The game starts in %s seconds!", t.getSecondsLeft());
+                            game.broadcastf("&6Ender starts in &7%d &6seconds!", (int) t.getSecondsLeft());
                             game.getPlayers().forEach(pp -> {
                                 pp.getPlayer().setLevel((int) t.getSecondsLeft());
                                 pp.getPlayer().setExp(t.getSecondsLeft() / t.getTotalSeconds());
-                                pp.getPlayer().playSound(pp.getPlayer(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.75f, 1f);
+                                pp.getPlayer().playSound(pp.getPlayer().getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.75f, 1f);
                             });
                         }
                 ).scheduleTimer());
@@ -93,8 +105,8 @@ public class GameManager {
 
     public void removePlayer(EnderPlayer player, Game game) {
         game.removePlayer(player);
-        game.broadcastf("&d%s &7left the game.");
-        if (game.getPlayers().size() < 2 && game.getState().equals(GameState.LOBBY)) {
+        game.broadcastf("&b%s &8has left the game!", player.getName());
+        if (game.getState().equals(GameState.LOBBY) && game.getPlayers().size() < 2) {
             game.cancelTask("start");
             game.broadcastf("&cNot enough players.");
             game.getPlayers().forEach(pp -> {
@@ -102,6 +114,12 @@ public class GameManager {
                 pp.getPlayer().setExp(0);
             });
         }
+    }
+
+    public void removePlayer(EnderPlayer player) {
+        Game game = getGame(player);
+        if (game != null)
+            removePlayer(player, game);
     }
 
 }

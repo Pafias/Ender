@@ -45,8 +45,8 @@ public class Countdown extends BukkitRunnable {
     @Override
     public void run() {
         if (secondsLeft < 1) {
-            afterTimer.run();
             if (assignedTask != null) assignedTask.cancel();
+            afterTimer.run();
             return;
         }
         if (secondsLeft == seconds) beforeTimer.run();

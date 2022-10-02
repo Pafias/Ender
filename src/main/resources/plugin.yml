@@ -1,12 +1,13 @@
 name: Ender
 version: '${project.version}'
 main: me.pafias.ender.Ender
-api-version: 1.19
+api-version: 1.13
 authors: [ Pafias ]
 description: Ender Halloween Minigame
+softdepend: [ Multiverse-Core ]
 commands:
   ender:
     usage: /ender [subcommand]
-    aliases: []
+    aliases: [ ]
     description: Ender main command
     permission: ender

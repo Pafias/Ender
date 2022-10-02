@@ -4,6 +4,7 @@ import me.pafias.ender.Ender;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -21,7 +22,7 @@ public class RandomUtils {
         double required_progress = 100.0;
         double progress_percentage = power / required_progress;
         StringBuilder sb = new StringBuilder();
-        int bar_length = 50;
+        int bar_length = 100;
         for (int i = 0; i < bar_length; i++) {
             if (i < bar_length * progress_percentage) {
                 ChatColor color = power < 25 ? ChatColor.RED : power < 75 ? ChatColor.GOLD : ChatColor.GREEN;
@@ -35,56 +36,63 @@ public class RandomUtils {
 
     public static <E> E getRandom(Set<E> set) {
         List<E> list = new ArrayList<>(set);
-        Collections.shuffle(list);
-        return list.stream().findAny().orElse(null);
+        return list.get(new Random().nextInt(list.size()));
     }
 
-    public static ItemStack[] getEnderOutfit() {
+    public static CompletableFuture<ItemStack[]> getEnderOutfit() {
+        CompletableFuture<ItemStack[]> future = new CompletableFuture<>();
+
         ItemStack[] is = new ItemStack[4];
 
-        ItemStack helmet = new ItemStack(Material.LEATHER_HELMET, 1);
-        LeatherArmorMeta helmetMeta = (LeatherArmorMeta) helmet.getItemMeta();
-        helmetMeta.setColor(Color.BLACK);
-        helmet.setItemMeta(helmetMeta);
+        getSkull(UUID.fromString("9d804032-98c2-4af0-96d7-b1c0f306362f")).thenAccept(skull -> {
+            SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+            skullMeta.setDisplayName("");
+            skullMeta.setLore(Collections.emptyList());
+            skull.setItemMeta(skullMeta);
 
-        ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
-        LeatherArmorMeta chestplateMeta = (LeatherArmorMeta) chestplate.getItemMeta();
-        chestplateMeta.setColor(Color.BLACK);
-        chestplate.setItemMeta(chestplateMeta);
+            ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
+            LeatherArmorMeta chestplateMeta = (LeatherArmorMeta) chestplate.getItemMeta();
+            chestplateMeta.setColor(Color.BLACK);
+            chestplate.setItemMeta(chestplateMeta);
 
-        ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS, 1);
-        LeatherArmorMeta leggingsMeta = (LeatherArmorMeta) leggings.getItemMeta();
-        leggingsMeta.setColor(Color.BLACK);
-        leggings.setItemMeta(leggingsMeta);
+            ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS, 1);
+            LeatherArmorMeta leggingsMeta = (LeatherArmorMeta) leggings.getItemMeta();
+            leggingsMeta.setColor(Color.BLACK);
+            leggings.setItemMeta(leggingsMeta);
 
-        ItemStack boots = new ItemStack(Material.LEATHER_BOOTS, 1);
-        LeatherArmorMeta bootsMeta = (LeatherArmorMeta) boots.getItemMeta();
-        bootsMeta.setColor(Color.BLACK);
-        boots.setItemMeta(bootsMeta);
+            ItemStack boots = new ItemStack(Material.LEATHER_BOOTS, 1);
+            LeatherArmorMeta bootsMeta = (LeatherArmorMeta) boots.getItemMeta();
+            bootsMeta.setColor(Color.BLACK);
+            boots.setItemMeta(bootsMeta);
 
-        is[0] = helmet;
-        is[1] = chestplate;
-        is[2] = leggings;
-        is[3] = boots;
+            is[3] = skull;
+            is[2] = chestplate;
+            is[1] = leggings;
+            is[0] = boots;
 
-        return is;
+            future.complete(is);
+        });
+
+        return future;
     }
 
     public static ItemStack[] getEnderTools() {
-        ItemStack[] is = new ItemStack[45];
+        ItemStack[] is = new ItemStack[35];
 
         ItemStack np = new ItemStack(Material.PLAYER_HEAD, 1);
         ItemMeta npMeta = np.getItemMeta();
-        npMeta.setDisplayName(CC.t("&6Next player"));
+        npMeta.setDisplayName(CC.t("&bTeleport!"));
+        npMeta.setLore(Arrays.asList(CC.t("&7Teleport near to a random player.")));
         np.setItemMeta(npMeta);
 
         ItemStack ft = new ItemStack(Material.PACKED_ICE, 1);
         ItemMeta ftMeta = ft.getItemMeta();
-        ftMeta.setDisplayName(CC.t("&6Freeze player"));
+        ftMeta.setDisplayName(CC.t("&bFreeze!"));
+        ftMeta.setLore(Arrays.asList(CC.t("&7Freeze players near to you for 3 seconds.")));
         ft.setItemMeta(ftMeta);
 
-        is[40] = np;
-        is[41] = ft;
+        is[3] = np;
+        is[4] = ft;
 
         return is;
     }
@@ -94,7 +102,7 @@ public class RandomUtils {
         new BukkitRunnable() {
             @Override
             public void run() {
-                ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
+                ItemStack is = new ItemStack(Material.LEGACY_SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
                 SkullMeta meta = (SkullMeta) is.getItemMeta();
                 meta.setOwningPlayer(plugin.getServer().getOfflinePlayer(player));
                 is.setItemMeta(meta);

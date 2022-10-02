@@ -22,7 +22,7 @@ public class GamesMenu extends GuiMenu {
             GameState state = game.getState();
             ItemStack is = new ItemStack(Material.PUMPKIN, size == 0 ? 1 : size);
             ItemMeta meta = is.getItemMeta();
-            meta.setDisplayName(CC.tf("&6Game ID: &7&o", game.getUUID().toString()));
+            meta.setDisplayName(CC.tf("&6Game ID: &7&o%s", game.getUUID().toString()));
             meta.setLore(Arrays.asList("", CC.t("&6Map: &bMansion"), CC.tf("&6Players: &b%d", size), CC.tf("&6State: %s", state.getName()), ""));
             if (state.equals(GameState.LOBBY))
                 meta.addEnchant(Enchantment.DURABILITY, 1, true);
