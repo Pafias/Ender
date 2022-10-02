@@ -1,7 +1,9 @@
 package me.pafias.ender.game;
 
 import me.pafias.ender.Ender;
+import me.pafias.ender.gui.GamesMenu;
 import me.pafias.ender.objects.EnderPlayer;
+import me.pafias.ender.util.CC;
 import me.pafias.ender.util.Countdown;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -19,6 +21,7 @@ public class GameManager {
 
     public GameManager(Ender plugin) {
         this.plugin = plugin;
+        gui = new GamesMenu();
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -26,6 +29,12 @@ public class GameManager {
                     createGame();
             }
         }.runTaskLaterAsynchronously(plugin, 3 * 20);
+    }
+
+    private final GamesMenu gui;
+
+    public GamesMenu getGUI() {
+        return gui;
     }
 
     private final Set<Game> games = new HashSet<>();
@@ -54,6 +63,7 @@ public class GameManager {
         try {
             Game game = new Game();
             games.add(game);
+            getGUI().update();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -75,6 +85,13 @@ public class GameManager {
         p.setLevel(0);
         p.setExp(0);
         p.teleport(game.getLobby().getGameWorld().getSpawnLocation());
+        p.getPlayer().sendMessage(CC.t("&3------------ &6HOW TO PLAY &3------------"));
+        p.getPlayer().sendMessage(CC.t("&e- Collect hidden pages"));
+        p.getPlayer().sendMessage(CC.t("&e- Don't look at ender"));
+        p.getPlayer().sendMessage(CC.t("&e- Use torch to light your way"));
+        p.getPlayer().sendMessage(CC.t("&e&l- Turn sound on &r&efor a better experience"));
+        p.getPlayer().sendMessage(CC.t("&3------------------------------------"));
+        p.getPlayer().sendMessage(CC.t("&c&lWARNING: &r&cThis game contains flashing lights and jump scares."));
         p.setGameMode(GameMode.ADVENTURE);
         p.getInventory().clear();
         p.setHealth(p.getMaxHealth());
@@ -91,16 +108,19 @@ public class GameManager {
                             game.start();
                         },
                         (t) -> {
-                            game.broadcastf("&6Ender starts in &7%d &6seconds!", (int) t.getSecondsLeft());
                             game.getPlayers().forEach(pp -> {
                                 pp.getPlayer().setLevel((int) t.getSecondsLeft());
                                 pp.getPlayer().setExp(t.getSecondsLeft() / t.getTotalSeconds());
-                                pp.getPlayer().playSound(pp.getPlayer().getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.75f, 1f);
+                                if (t.getSecondsLeft() == 15 || t.getSecondsLeft() == 10 || t.getSecondsLeft() <= 5) {
+                                    pp.getPlayer().sendMessage(CC.tf("&9Ender starting in %d seconds!", (int) t.getSecondsLeft()));
+                                    pp.getPlayer().playSound(pp.getPlayer().getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.75f, 1f);
+                                }
                             });
                         }
                 ).scheduleTimer());
             }
         }
+        getGUI().update();
     }
 
     public void removePlayer(EnderPlayer player, Game game) {
@@ -114,6 +134,7 @@ public class GameManager {
                 pp.getPlayer().setExp(0);
             });
         }
+        getGUI().update();
     }
 
     public void removePlayer(EnderPlayer player) {

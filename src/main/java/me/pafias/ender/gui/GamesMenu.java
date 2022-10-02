@@ -15,8 +15,13 @@ import java.util.Arrays;
 
 public class GamesMenu extends GuiMenu {
 
-    public GamesMenu(Player player) {
-        super(player, CC.t("&c&lSpooky game selection"), 9);
+    public GamesMenu() {
+        super(CC.t("&c&lSpooky game selection"), 9);
+    }
+
+    @Override
+    public void update() {
+        getInventory().clear();
         plugin.getSM().getGameManager().getGames().forEach(game -> {
             int size = game.getPlayers().size();
             GameState state = game.getState();
@@ -33,7 +38,7 @@ public class GamesMenu extends GuiMenu {
     }
 
     @Override
-    public void clickHandler(ItemStack item, int slot) {
+    public void clickHandler(Player player, ItemStack item, int slot) {
         GameManager manager = plugin.getSM().getGameManager();
         Game game = manager.getGame(item.getItemMeta().getDisplayName());
         if (game == null) {

@@ -44,16 +44,19 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onMapInitialize(MapInitializeEvent event) {
-        Game game = plugin.getSM().getGameManager().getGame(event.getMap().getWorld());
-        if (game == null) return;
-        event.getMap().setScale(MapView.Scale.CLOSEST);
-        event.getMap().setUnlimitedTracking(false);
-        event.getMap().getRenderers().clear();
         try {
-            BufferedImage image = ImageIO.read(game.getPageManager().getRandomPage());
-            event.getMap().addRenderer(new PageRenderer(image));
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            Game game = plugin.getSM().getGameManager().getGame(event.getMap().getWorld());
+            if (game == null) return;
+            event.getMap().setScale(MapView.Scale.CLOSEST);
+            event.getMap().setUnlimitedTracking(false);
+            event.getMap().getRenderers().clear();
+            try {
+                BufferedImage image = ImageIO.read(game.getPageManager().getRandomPage());
+                event.getMap().addRenderer(new PageRenderer(image));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        } catch (NullPointerException ignored) {
         }
     }
 

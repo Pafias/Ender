@@ -44,7 +44,7 @@ public final class Ender extends JavaPlugin {
     private void register() {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new JoinQuitListener(plugin), plugin);
-        pm.registerEvents(new NPCListener(), plugin);
+        pm.registerEvents(new NPCListener(plugin), plugin);
         pm.registerEvents(new ProtectionListener(plugin), plugin);
         pm.registerEvents(new EnderListener(plugin), plugin);
         pm.registerEvents(new GameListener(plugin), plugin);

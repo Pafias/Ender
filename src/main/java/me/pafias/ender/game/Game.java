@@ -52,10 +52,12 @@ public class Game {
     private PageManager pageManager;
     private JumpscareManager jumpscareManager;
     private SoundManager soundManager;
+    private LobbyManager lobbyManager;
 
     public Game() throws IOException {
         uuid = UUID.randomUUID();
         lobby = new GameWorld(plugin.getSM().getVariables().gameLobby, uuid.toString().split("-")[0]);
+        lobbyManager = new LobbyManager(this);
         world = new GameWorld(plugin.getSM().getVariables().gameSpawn, uuid.toString().split("-")[0]);
         state = GameState.LOBBY;
         players = new HashSet<>();
@@ -123,16 +125,14 @@ public class Game {
     }
 
     private void handleEnder() {
-        if (ender == null)
-            ender = RandomUtils.getRandom(getPlayers());
+        if (ender == null) ender = RandomUtils.getRandom(getPlayers());
         ender.setEnder(true);
         ender.setFrozen(true);
         RandomUtils.getEnderOutfit().thenAccept(outfit -> ender.getPlayer().getInventory().setArmorContents(outfit));
         ender.getPlayer().getInventory().setStorageContents(RandomUtils.getEnderTools());
         double nX, nZ;
         float nAng = world.getGameWorld().getSpawnLocation().getYaw();
-        if (nAng < 0)
-            nAng += 360;
+        if (nAng < 0) nAng += 360;
         nX = Math.cos(Math.toRadians(nAng));
         nZ = Math.sin(Math.toRadians(nAng));
         Location loc = world.getGameWorld().getSpawnLocation().clone();
@@ -195,10 +195,9 @@ public class Game {
             public void run() {
                 countdownTasks.put("gametimer", new Countdown(plugin, gameDuration * 60, () -> {
                     getPlayers().forEach(p -> bossBar.addPlayer(p.getPlayer()));
-                },
-                        () -> {
-                            endGame(GameEndReason.TIME_UP);
-                        }, (t) -> {
+                }, () -> {
+                    endGame(GameEndReason.TIME_UP);
+                }, (t) -> {
                     bossBar.setProgress(t.getSecondsLeft() / t.getTotalSeconds());
                     bossBar.setTitle(CC.tf("&dTime remaining: &a%02d:%02d", (int) (t.getSecondsLeft() / 60), (int) (t.getSecondsLeft() % 60)));
                     if (t.getSecondsLeft() == t.getTotalSeconds() / 2) {
@@ -222,10 +221,8 @@ public class Game {
                 if (humans.isEmpty()) return;
                 Jumpscare jumpscare = jumpscareManager.getRandomJumpscare();
                 int random;
-                if (humans.size() == 1)
-                    random = 1;
-                else
-                    random = new Random().nextInt(humans.size() - 1) + 1;
+                if (humans.size() == 1) random = 1;
+                else random = new Random().nextInt(humans.size() - 1) + 1;
                 for (int i = 0; i < random; i++)
                     jumpscare.execute(RandomUtils.getRandom(humans).getPlayer());
             }
@@ -272,8 +269,7 @@ public class Game {
                             }
                         }.runTaskLater(plugin, 15 * 20);
                     } catch (IllegalArgumentException ex) {
-                        if (!ex.getMessage().contains("no free face"))
-                            ex.printStackTrace();
+                        if (!ex.getMessage().contains("no free face")) ex.printStackTrace();
                     }
                 }
             }
@@ -377,10 +373,8 @@ public class Game {
                 countdownTasks.values().forEach(Countdown::cancel);
                 repeatingTasks.values().forEach(BukkitTask::cancel);
                 try {
-                    if (enderTeam != null)
-                        enderTeam.unregister();
-                    if (humansTeam != null)
-                        humansTeam.unregister();
+                    if (enderTeam != null) enderTeam.unregister();
+                    if (humansTeam != null) humansTeam.unregister();
                     if (bossBar != null) {
                         bossBar.removeAll();
                         bossBar.hide();
@@ -389,7 +383,7 @@ public class Game {
                     gameScoreboard.getObjectives().forEach(Objective::unregister);
                 } catch (Exception ignored) {
                 }
-                getPlayers().forEach(p -> {
+                for (EnderPlayer p : getPlayers()) {
                     p.setTorch(null);
                     p.setEnder(false);
                     p.getPlayer().getInventory().clear();
@@ -404,7 +398,8 @@ public class Game {
                     p.getPlayer().getActivePotionEffects().forEach(pe -> p.getPlayer().removePotionEffect(pe.getType()));
                     p.getPlayer().teleport(plugin.getSM().getVariables().serverLobby);
                     // p.getPlayer().setResourcePack("https://www.dropbox.com/s/swf39bbwjqogyj4/empty.zip?dl=1");
-                });
+                }
+                getPlayers().clear();
                 world.deleteGameWorld();
             }
         }.runTask(plugin);
@@ -441,8 +436,7 @@ public class Game {
 
     public void removePlayer(EnderPlayer player) {
         getPlayers().remove(player);
-        if (player.isEnder())
-            endGame(GameEndReason.ENDER_LEFT);
+        if (player.isEnder()) endGame(GameEndReason.ENDER_LEFT);
     }
 
     public int getMaxPlayers() {

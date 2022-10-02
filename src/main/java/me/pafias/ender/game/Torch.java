@@ -57,7 +57,12 @@ public class Torch {
             if (task != null)
                 task.cancel();
             currentItem = offItem;
-            player.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0, false, false));
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    player.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0, false, false));
+                }
+            }.runTask(plugin);
         }
         changeInventoryItem();
     }

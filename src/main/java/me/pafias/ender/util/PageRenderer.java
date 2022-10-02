@@ -27,7 +27,7 @@ public class PageRenderer extends MapRenderer {
             @Override
             public void run() {
                 try {
-                    canvas.drawImage(image.getWidth() / 4, 0, image);
+                    canvas.drawImage(0, 0, image);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

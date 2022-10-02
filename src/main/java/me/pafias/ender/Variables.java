@@ -36,6 +36,7 @@ public class Variables {
     public int freezeCooldownSeconds;
     public int tpCooldownSeconds;
     public int pages;
+    public List<String> lobbyTips;
 
     private void reloadConfigYML() {
         FileConfiguration config = plugin.getConfig();
@@ -70,6 +71,7 @@ public class Variables {
         freezeCooldownSeconds = config.getInt("freeze_cooldown_seconds");
         tpCooldownSeconds = config.getInt("teleport_cooldown_seconds");
         pages = config.getInt("pages");
+        lobbyTips = config.getStringList("lobby_tips");
     }
 
 }

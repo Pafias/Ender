@@ -1,6 +1,6 @@
 games: 2
 
-max_players: 10
+max_players: 12
 
 game_duration_minutes: 30
 
@@ -32,6 +32,13 @@ game_spawn:
   z: -38.5
   yaw: 0.0
   pitch: 0.0
+
+lobby_tips:
+  - "&e&lTIP: &r&aUse your torch wisely"
+  - "&e&lTIP: &r&aDon't look at the Ender"
+  - "&e&lTIP: &r&aThere are no pages outside the mansion"
+  - "&e&lTIP: &r&aSearch for the pages"
+  - "&e&lTIP: &r&aAs the Ender, try to make players look at you"
 
 page_locations:
   - 1973.5,12.5,-12.03125,180.0,0.0,NORTH
