@@ -36,10 +36,11 @@ public class AddpagelocationCommand extends ICommand {
         }
         if (!selecting.contains(((Player) sender).getUniqueId())) {
             selecting.add(((Player) sender).getUniqueId());
-            sender.sendMessage(CC.t("&6Right-click an ItemFrame"));
+            sender.sendMessage(CC.t("&6Right-click the block where the ItemFrame should be placed."));
+            sender.sendMessage(CC.t("&6Don't mind two messages showing up with one click, only the first one counts."));
         } else {
             selecting.remove(((Player) sender).getUniqueId());
-            sender.sendMessage(CC.t("&6No longer selecting ItemFrames"));
+            sender.sendMessage(CC.t("&6No longer adding pages."));
         }
     }
 

@@ -3,7 +3,6 @@ package me.pafias.ender.listeners;
 import me.pafias.ender.Ender;
 import me.pafias.ender.game.Game;
 import me.pafias.ender.game.GameState;
-import me.pafias.ender.objects.EnderPlayer;
 import me.pafias.ender.util.PageRenderer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,8 +25,7 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
-        EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer(event.getPlayer());
-        Game game = plugin.getSM().getGameManager().getGame(player);
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         if (game.getState().equals(GameState.PREGAME))
             if (event.getTo().getX() != event.getFrom().getX() || event.getTo().getZ() != event.getFrom().getZ())
@@ -36,8 +34,7 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onOffHand(PlayerSwapHandItemsEvent event) {
-        EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer(event.getPlayer());
-        Game game = plugin.getSM().getGameManager().getGame(player);
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         event.setCancelled(true);
     }
@@ -45,7 +42,7 @@ public class GameListener implements Listener {
     @EventHandler
     public void onMapInitialize(MapInitializeEvent event) {
         try {
-            Game game = plugin.getSM().getGameManager().getGame(event.getMap().getWorld());
+            Game game = plugin.getSM().getGameManager().getGame();
             if (game == null) return;
             event.getMap().setScale(MapView.Scale.CLOSEST);
             event.getMap().setUnlimitedTracking(false);

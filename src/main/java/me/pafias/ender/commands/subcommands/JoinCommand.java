@@ -2,15 +2,15 @@ package me.pafias.ender.commands.subcommands;
 
 import me.pafias.ender.commands.ICommand;
 import me.pafias.ender.game.Game;
-import me.pafias.ender.objects.EnderPlayer;
+import me.pafias.ender.game.GameState;
 import me.pafias.ender.util.CC;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class StopCommand extends ICommand {
+public class JoinCommand extends ICommand {
 
-    public StopCommand() {
-        super("stop", "ender.stop");
+    public JoinCommand() {
+        super("create", "ender.create", "c");
     }
 
     @Override
@@ -20,7 +20,7 @@ public class StopCommand extends ICommand {
 
     @Override
     public String getDescription() {
-        return "Stop the game";
+        return "Create a game";
     }
 
     @Override
@@ -29,14 +29,21 @@ public class StopCommand extends ICommand {
             sender.sendMessage(CC.t("&cOnly players!"));
             return;
         }
-        EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer((Player) sender);
+        String input;
+        if (args.length < 2)
+            input = null;
+        else
+            input = args[1];
         Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) {
-            sender.sendMessage(CC.t("&cYou are not in a game!"));
+            sender.sendMessage(CC.t("&cGame not found."));
             return;
         }
-        game.stop();
-        sender.sendMessage(CC.t("&aGame stopped!"));
+        if (!game.getState().equals(GameState.LOBBY)) {
+            sender.sendMessage(CC.t("&cThis game has already started."));
+            return;
+        }
+        plugin.getSM().getGameManager().addPlayer((Player) sender);
     }
 
 }

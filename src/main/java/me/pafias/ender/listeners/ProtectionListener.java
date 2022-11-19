@@ -2,7 +2,7 @@ package me.pafias.ender.listeners;
 
 import me.pafias.ender.Ender;
 import me.pafias.ender.game.Game;
-import me.pafias.ender.objects.EnderPlayer;
+import org.bukkit.GameMode;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +12,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 
@@ -31,7 +32,8 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        Game game = plugin.getSM().getGameManager().getGame(plugin.getSM().getPlayerManager().getPlayer((Player) event.getWhoClicked()));
+        if (event.getWhoClicked().getGameMode().equals(GameMode.CREATIVE)) return;
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         event.setCancelled(true);
     }
@@ -40,7 +42,7 @@ public class ProtectionListener implements Listener {
     public void onDamage(EntityDamageEvent event) {
         if (event.getCause().equals(EntityDamageEvent.DamageCause.WITHER)) return;
         if (!(event.getEntity() instanceof Player)) return;
-        Game game = plugin.getSM().getGameManager().getGame(plugin.getSM().getPlayerManager().getPlayer((Player) event.getEntity()));
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         event.setCancelled(true);
     }
@@ -48,24 +50,31 @@ public class ProtectionListener implements Listener {
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
-        EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer((Player) event.getEntity());
-        Game game = plugin.getSM().getGameManager().getGame(player);
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         event.setCancelled(true);
     }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer(event.getPlayer());
-        Game game = plugin.getSM().getGameManager().getGame(player);
+        if (event.getBlock().getWorld().getName().equalsIgnoreCase(plugin.getSM().getVariables().serverLobby.getWorld().getName()))
+            if (!event.getPlayer().getGameMode().equals(GameMode.CREATIVE)) {
+                event.setCancelled(true);
+                return;
+            }
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         event.setCancelled(true);
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer(event.getPlayer());
-        Game game = plugin.getSM().getGameManager().getGame(player);
+        if (event.getBlock().getWorld().getName().equalsIgnoreCase(plugin.getSM().getVariables().serverLobby.getWorld().getName()))
+            if (!event.getPlayer().getGameMode().equals(GameMode.CREATIVE)) {
+                event.setCancelled(true);
+                return;
+            }
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         event.setCancelled(true);
     }
@@ -75,6 +84,13 @@ public class ProtectionListener implements Listener {
         if (!(event.getEntity() instanceof Player)) return;
         if (event.getCause().equals(EntityDamageEvent.DamageCause.FALL))
             event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onHangingBreak(HangingBreakByEntityEvent event) {
+        if (event.getRemover() instanceof Player && ((Player) event.getRemover()).getGameMode().equals(GameMode.CREATIVE))
+            return;
+        event.setCancelled(true);
     }
 
 }

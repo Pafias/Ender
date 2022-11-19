@@ -5,6 +5,7 @@ import me.pafias.ender.game.Game;
 import me.pafias.ender.game.GameEndReason;
 import me.pafias.ender.game.GameState;
 import me.pafias.ender.game.pages.PageManager;
+import me.pafias.ender.game.sounds.Sound;
 import me.pafias.ender.objects.EnderPlayer;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -19,11 +20,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 public class HumansListener implements Listener {
 
@@ -36,7 +34,7 @@ public class HumansListener implements Listener {
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer(event.getEntity());
-        Game game = plugin.getSM().getGameManager().getGame(player);
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         if (!game.getState().equals(GameState.INGAME)) return;
         event.setDeathMessage(null);
@@ -71,23 +69,21 @@ public class HumansListener implements Listener {
         handlePage(event.getPlayer(), frame);
     }
 
-    private Set<UUID> pageCooldown = new HashSet<>();
-
     private void handlePage(Player player, ItemFrame frame) {
-        if (pageCooldown.contains(player.getUniqueId())) return;
-        else pageCooldown.add(player.getUniqueId());
         EnderPlayer p = plugin.getSM().getPlayerManager().getPlayer(player);
-        Game game = plugin.getSM().getGameManager().getGame(p);
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
+        if (game.pageCooldown.contains(player.getUniqueId())) return;
+        else game.pageCooldown.add(player.getUniqueId());
         if (p.isEnder()) return;
         PageManager pm = game.getPageManager();
-        frame.remove();
+        frame.setItem(new ItemStack(Material.AIR), false);
         pm.addPage();
         game.broadcastf("&b%s &6collected a page! &b(%d/%d)", p.getName(), pm.getPagesFound(), pm.getTotalPages());
         new BukkitRunnable() {
             @Override
             public void run() {
-                pageCooldown.remove(player.getUniqueId());
+                game.pageCooldown.remove(player.getUniqueId());
             }
         }.runTaskLater(plugin, 2);
         if (pm.getPagesFound() >= pm.getTotalPages())
@@ -108,8 +104,24 @@ public class HumansListener implements Listener {
     public void onMove(PlayerMoveEvent event) {
         EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer(event.getPlayer());
         if (player.isFrozen())
-            // if (event.getTo().getX() != event.getFrom().getX() || event.getTo().getZ() != event.getFrom().getZ())
             event.setTo(event.getFrom());
+        Game game = plugin.getSM().getGameManager().getGame();
+        if (game == null) return;
+        if (game.soundCooldown.contains(event.getPlayer().getUniqueId())) return;
+        game.getSoundManager().getTriggerPlaces().keySet().forEach(place -> {
+            if (place.isInside(event.getTo())) {
+                game.soundCooldown.add(event.getPlayer().getUniqueId());
+                Sound sound = game.getSoundManager().getTriggerPlaces().get(place);
+                if (sound == null) return;
+                sound.play(event.getPlayer(), place.getSourceLocation());
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        game.soundCooldown.remove(event.getPlayer().getUniqueId());
+                    }
+                }.runTaskLaterAsynchronously(plugin, 2 * 60 * 20);
+            }
+        });
     }
 
 }

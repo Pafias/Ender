@@ -1,19 +1,13 @@
 package me.pafias.ender.game;
 
 import me.pafias.ender.Ender;
-import me.pafias.ender.gui.GamesMenu;
 import me.pafias.ender.objects.EnderPlayer;
 import me.pafias.ender.util.CC;
 import me.pafias.ender.util.Countdown;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 public class GameManager {
 
@@ -21,63 +15,35 @@ public class GameManager {
 
     public GameManager(Ender plugin) {
         this.plugin = plugin;
-        gui = new GamesMenu();
         new BukkitRunnable() {
             @Override
             public void run() {
-                for (int i = 0; i < plugin.getSM().getVariables().games; i++)
-                    createGame();
+                createGame();
             }
         }.runTaskLaterAsynchronously(plugin, 3 * 20);
     }
 
-    private final GamesMenu gui;
+    private Game game;
 
-    public GamesMenu getGUI() {
-        return gui;
+    public Game getGame() {
+        return game;
     }
 
-    private final Set<Game> games = new HashSet<>();
-
-    public Set<Game> getGames() {
-        return games;
-    }
-
-    public Game getGame(UUID uuid) {
-        return games.stream().filter(game -> game.getUUID().equals(uuid)).findAny().orElse(null);
-    }
-
-    public Game getGame(String guiItemName) {
-        return games.stream().filter(game -> game.getUUID().toString().contains(guiItemName) || guiItemName.contains(game.getUUID().toString())).findAny().orElse(null);
-    }
-
-    public Game getGame(World world) {
-        return games.stream().filter(game -> game.getWorld().getGameWorld().getName().equalsIgnoreCase(world.getName())).findAny().orElse(null);
-    }
-
-    public Game getGame(EnderPlayer player) {
-        return games.stream().filter(game -> game.getPlayers().contains(player)).findAny().orElse(null);
-    }
-
-    public void createGame() {
+    public Game createGame() {
         try {
-            Game game = new Game();
-            games.add(game);
-            getGUI().update();
+            game = new Game();
+            return game;
         } catch (Exception ex) {
             ex.printStackTrace();
+            return null;
         }
     }
 
-    public void removeGame(Game game) {
-        games.remove(game);
+    public void addPlayer(Player player) {
+        addPlayer(plugin.getSM().getPlayerManager().getPlayer(player));
     }
 
-    public void addPlayer(Player player, Game game) {
-        addPlayer(plugin.getSM().getPlayerManager().getPlayer(player), game);
-    }
-
-    public void addPlayer(EnderPlayer player, Game game) {
+    public void addPlayer(EnderPlayer player) {
         if (game.getPlayers().size() >= game.getMaxPlayers()) return;
         if (!game.getState().equals(GameState.LOBBY)) return;
         Player p = player.getPlayer();
@@ -98,10 +64,10 @@ public class GameManager {
         p.setFoodLevel(20);
         game.addPlayer(player);
         if (!p.hasResourcePack())
-            p.setResourcePack("https://www.dropbox.com/s/b74jwhgywl9cc2v/CubeCraft-Ender-Pack.zip?dl=1");
+            p.setResourcePack("https://www.dropbox.com/s/o9faxsfuz7pului/Ender-Pack-1_16.zip?dl=1");
         if (game.getPlayers().size() >= 2) {
             if (!game.getCountdownTasks().containsKey("start")) {
-                game.getCountdownTasks().put("start", new Countdown(plugin, 15, () -> {
+                game.getCountdownTasks().put("start", new Countdown(plugin, plugin.getSM().getVariables().gameStartCountdown, () -> {
                 },
                         () -> {
                             game.getCountdownTasks().remove("start");
@@ -120,10 +86,9 @@ public class GameManager {
                 ).scheduleTimer());
             }
         }
-        getGUI().update();
     }
 
-    public void removePlayer(EnderPlayer player, Game game) {
+    public void removePlayer(EnderPlayer player) {
         game.removePlayer(player);
         game.broadcastf("&b%s &8has left the game!", player.getName());
         if (game.getState().equals(GameState.LOBBY) && game.getPlayers().size() < 2) {
@@ -134,13 +99,6 @@ public class GameManager {
                 pp.getPlayer().setExp(0);
             });
         }
-        getGUI().update();
-    }
-
-    public void removePlayer(EnderPlayer player) {
-        Game game = getGame(player);
-        if (game != null)
-            removePlayer(player, game);
     }
 
 }

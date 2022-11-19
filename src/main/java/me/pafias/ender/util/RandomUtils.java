@@ -4,12 +4,11 @@ import me.pafias.ender.Ender;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -44,11 +43,7 @@ public class RandomUtils {
 
         ItemStack[] is = new ItemStack[4];
 
-        getSkull(UUID.fromString("9d804032-98c2-4af0-96d7-b1c0f306362f")).thenAccept(skull -> {
-            SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-            skullMeta.setDisplayName("");
-            skullMeta.setLore(Collections.emptyList());
-            skull.setItemMeta(skullMeta);
+        getSkull("scarycatDJ").thenAccept(skull -> {
 
             ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
             LeatherArmorMeta chestplateMeta = (LeatherArmorMeta) chestplate.getItemMeta();
@@ -82,13 +77,13 @@ public class RandomUtils {
         ItemStack np = new ItemStack(Material.PLAYER_HEAD, 1);
         ItemMeta npMeta = np.getItemMeta();
         npMeta.setDisplayName(CC.t("&bTeleport!"));
-        npMeta.setLore(Arrays.asList(CC.t("&7Teleport near to a random player.")));
+        npMeta.setLore(Collections.singletonList(CC.t("&7Teleport near to a random player.")));
         np.setItemMeta(npMeta);
 
         ItemStack ft = new ItemStack(Material.PACKED_ICE, 1);
         ItemMeta ftMeta = ft.getItemMeta();
         ftMeta.setDisplayName(CC.t("&bFreeze!"));
-        ftMeta.setLore(Arrays.asList(CC.t("&7Freeze players near to you for 3 seconds.")));
+        ftMeta.setLore(Collections.singletonList(CC.t("&7Freeze players near to you for 3 seconds.")));
         ft.setItemMeta(ftMeta);
 
         is[3] = np;
@@ -97,18 +92,21 @@ public class RandomUtils {
         return is;
     }
 
-    public static CompletableFuture<ItemStack> getSkull(UUID player) {
+    public static CompletableFuture<ItemStack> getSkull(String name) {
         CompletableFuture<ItemStack> future = new CompletableFuture<>();
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                ItemStack is = new ItemStack(Material.LEGACY_SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-                SkullMeta meta = (SkullMeta) is.getItemMeta();
-                meta.setOwningPlayer(plugin.getServer().getOfflinePlayer(player));
-                is.setItemMeta(meta);
-                future.complete(is);
-            }
-        }.runTaskAsynchronously(plugin);
+        ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
+        SkullMeta meta = (SkullMeta) is.getItemMeta();
+        getOwner(name).thenAccept(owner -> {
+            meta.setOwner(owner.getName());
+            is.setItemMeta(meta);
+            future.complete(is);
+        });
+        return future;
+    }
+
+    private static CompletableFuture<OfflinePlayer> getOwner(String name) {
+        CompletableFuture<OfflinePlayer> future = new CompletableFuture<>();
+        future.complete(plugin.getServer().getOfflinePlayer(name));
         return future;
     }
 

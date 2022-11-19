@@ -4,7 +4,7 @@ import me.pafias.ender.util.CC;
 
 public enum GameState {
 
-    LOBBY("&aWaiting..."), PREGAME("&cStarted"), INGAME("&cIn game"), POSTGAME("&bEnding...");
+    STARTING("Game starting..."), LOBBY("&aWaiting..."), PREGAME("&cStarted"), INGAME("&cIn game"), POSTGAME("&bEnding...");
 
     private String name;
 

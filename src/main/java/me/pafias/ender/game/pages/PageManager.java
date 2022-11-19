@@ -6,6 +6,9 @@ import me.pafias.ender.util.RandomUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.util.HashMap;
@@ -15,11 +18,9 @@ import java.util.Random;
 public class PageManager {
 
     private final Ender plugin;
-    private final Game game;
 
     public PageManager(Ender plugin, Game game) {
         this.plugin = plugin;
-        this.game = game;
         total = plugin.getSM().getVariables().pages;
         found = 0;
         plugin.getSM().getVariables().pageLocations.forEach(loc -> {
@@ -31,21 +32,31 @@ public class PageManager {
             BlockFace face = BlockFace.valueOf(loc.split(",")[5]);
             Location location = new Location(game.getWorld().getGameWorld(), x, y, z, yaw, pitch);
             location.getWorld().getBlockAt(location).setType(Material.AIR);
-            locations.put(location, face);
+
+            ItemStack map = new ItemStack(Material.FILLED_MAP, 1);
+            ItemFrame frame = game.getWorld().getGameWorld().spawn(location, ItemFrame.class, f -> {
+                f.setFacingDirection(face, true);
+            });
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    frame.setItem(map, false);
+                    frame.setItem(new ItemStack(Material.AIR), false);
+                    frame.setVisible(false);
+                    frames.put(frame, map);
+                }
+            }.runTaskLater(plugin, 10);
         });
     }
 
-    private Map<Location, BlockFace> locations = new HashMap<>();
+    private Map<ItemFrame, ItemStack> frames = new HashMap<>();
 
-    private int found;
-    private int total;
-
-    public Map<Location, BlockFace> getLocations() {
-        return locations;
+    public Map<ItemFrame, ItemStack> getItemFrames() {
+        return frames;
     }
 
-    public Location getRandomLocation() {
-        return RandomUtils.getRandom(locations.keySet());
+    public ItemFrame getRandomFrame() {
+        return RandomUtils.getRandom(frames.keySet());
     }
 
     public File getRandomPage() {
@@ -54,6 +65,10 @@ public class PageManager {
         File page = new File(dir, pageName);
         return page;
     }
+
+
+    private int found;
+    private final int total;
 
     public int getPagesFound() {
         return found;

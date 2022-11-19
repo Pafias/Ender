@@ -26,6 +26,8 @@ public class Variables {
         }.runTaskAsynchronously(plugin);
     }
 
+    public String hubServer;
+
     public Location serverLobby;
     public Location gameLobby;
     public Location gameSpawn;
@@ -37,6 +39,8 @@ public class Variables {
     public int tpCooldownSeconds;
     public int pages;
     public List<String> lobbyTips;
+    public int gameStartCountdown;
+    public int enderReleaseCountdown;
 
     private void reloadConfigYML() {
         FileConfiguration config = plugin.getConfig();
@@ -64,6 +68,7 @@ public class Variables {
                 (float) config.getDouble("game_spawn.yaw"),
                 (float) config.getDouble("game_spawn.pitch")
         );
+        hubServer = config.getString("hub_server");
         maxPlayers = config.getInt("max_players");
         gameDuration = config.getInt("game_duration_minutes");
         games = config.getInt("games");
@@ -72,6 +77,8 @@ public class Variables {
         tpCooldownSeconds = config.getInt("teleport_cooldown_seconds");
         pages = config.getInt("pages");
         lobbyTips = config.getStringList("lobby_tips");
+        gameStartCountdown = config.getInt("game_start_countdown");
+        enderReleaseCountdown = config.getInt("ender_release_countdown");
     }
 
 }

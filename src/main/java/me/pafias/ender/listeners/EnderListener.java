@@ -14,8 +14,7 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class EnderListener implements Listener {
 
@@ -25,18 +24,18 @@ public class EnderListener implements Listener {
         this.plugin = plugin;
     }
 
-    private long tpCooldown;
+    private Map<UUID, Long> tpCooldown = new HashMap<>();
 
     @EventHandler
     public void onTeleportItem(PlayerInteractEvent event) {
         if (!event.hasItem()) return;
         EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer(event.getPlayer());
         if (!player.isEnder()) return;
-        Game game = plugin.getSM().getGameManager().getGame(player);
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         if (!event.getItem().getType().equals(Material.PLAYER_HEAD)) return;
-        if (tpCooldown != 0) {
-            long secondsLeft = ((tpCooldown / 1000) + plugin.getSM().getVariables().tpCooldownSeconds) - (System.currentTimeMillis() / 1000);
+        if (tpCooldown.get(event.getPlayer().getUniqueId()) != 0) {
+            long secondsLeft = ((tpCooldown.get(event.getPlayer().getUniqueId()) / 1000) + plugin.getSM().getVariables().tpCooldownSeconds) - (System.currentTimeMillis() / 1000);
             if (secondsLeft > 0) {
                 event.getPlayer().sendMessage(CC.tf("&cYou cannot use &bTeleport &cfor another %d seconds!", (int) secondsLeft));
                 return;
@@ -47,11 +46,11 @@ public class EnderListener implements Listener {
             EnderPlayer target = RandomUtils.getRandom(humans);
             event.getPlayer().teleport(target.getPlayer().getLocation().clone().add(new Random().nextDouble(), 0, new Random().nextDouble()));
             event.getPlayer().sendMessage(CC.t("&6You teleported to &ba human"));
-            tpCooldown = System.currentTimeMillis();
+            tpCooldown.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    tpCooldown = 0;
+                    tpCooldown.remove(event.getPlayer().getUniqueId());
                     event.getPlayer().sendMessage(CC.t("&6You can now use your &bTeleport &6ability!"));
                 }
             }.runTaskLater(plugin, plugin.getSM().getVariables().tpCooldownSeconds * 20L);
@@ -67,7 +66,7 @@ public class EnderListener implements Listener {
         if (!(event.getRightClicked() instanceof Player)) return;
         EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer(event.getPlayer());
         if (!player.isEnder()) return;
-        Game game = plugin.getSM().getGameManager().getGame(player);
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) return;
         if (!event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.PACKED_ICE)) return;
         if (freezeCooldown != 0) {

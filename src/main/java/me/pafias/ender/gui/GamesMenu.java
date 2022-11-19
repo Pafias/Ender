@@ -2,16 +2,9 @@ package me.pafias.ender.gui;
 
 import me.pafias.ender.game.Game;
 import me.pafias.ender.game.GameManager;
-import me.pafias.ender.game.GameState;
 import me.pafias.ender.util.CC;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.Arrays;
 
 public class GamesMenu extends GuiMenu {
 
@@ -22,6 +15,7 @@ public class GamesMenu extends GuiMenu {
     @Override
     public void update() {
         getInventory().clear();
+        /*
         plugin.getSM().getGameManager().getGames().forEach(game -> {
             int size = game.getPlayers().size();
             GameState state = game.getState();
@@ -35,17 +29,18 @@ public class GamesMenu extends GuiMenu {
             is.setItemMeta(meta);
             getInventory().addItem(is);
         });
+         */
     }
 
     @Override
     public void clickHandler(Player player, ItemStack item, int slot) {
         GameManager manager = plugin.getSM().getGameManager();
-        Game game = manager.getGame(item.getItemMeta().getDisplayName());
+        Game game = manager.getGame();
         if (game == null) {
             setCloseOnClick(false);
             return;
         }
-        manager.addPlayer(player, game);
+        manager.addPlayer(player);
     }
 
 }

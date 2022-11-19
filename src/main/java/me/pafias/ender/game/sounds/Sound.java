@@ -1,22 +1,28 @@
 package me.pafias.ender.game.sounds;
 
 import me.pafias.ender.Ender;
+import me.pafias.ender.game.Game;
+import me.pafias.ender.game.GameState;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Sound {
 
     private final Ender plugin = Ender.get();
+    private final Game game;
 
     private String name;
     private SoundType type;
     private int amount;
     private Set<Player> playing;
 
-    public Sound(String name, int variations) {
+    public Sound(Game game, String name, int variations) {
+        this.game = game;
         this.name = name;
         this.amount = variations;
         type = SoundType.valueOf(name.split("\\.")[1].toUpperCase());
@@ -31,7 +37,7 @@ public class Sound {
         return type;
     }
 
-    public void play(Player player) {
+    public void play(Player player, @Nullable Location location) {
         if (amount == 0) {
             player.playSound(player.getEyeLocation(), getName(), 1f, 1f);
         } else {
@@ -41,7 +47,8 @@ public class Sound {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        player.playSound(player.getEyeLocation(), getName() + finalI, 1f, 1f);
+                        if (!game.getState().equals(GameState.INGAME)) cancel();
+                        player.playSound(location != null ? location : player.getEyeLocation(), getName() + finalI, 1f, 1f);
                     }
                 }.runTaskLater(plugin, (i * 5L) * 20);
             }

@@ -9,8 +9,8 @@ import me.pafias.ender.objects.EnderPlayer;
 import me.pafias.ender.util.CC;
 import me.pafias.ender.util.Countdown;
 import me.pafias.ender.util.RandomUtils;
+import net.kyori.adventure.sound.SoundStop;
 import org.bukkit.*;
-import org.bukkit.block.BlockFace;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.KeyedBossBar;
@@ -30,6 +30,7 @@ import org.bukkit.scoreboard.Team;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class Game {
@@ -53,20 +54,25 @@ public class Game {
     private JumpscareManager jumpscareManager;
     private SoundManager soundManager;
     private LobbyManager lobbyManager;
+    public Set<UUID> pageCooldown;
+    public Set<UUID> soundCooldown;
 
     public Game() throws IOException {
+        state = GameState.STARTING;
         uuid = UUID.randomUUID();
         lobby = new GameWorld(plugin.getSM().getVariables().gameLobby, uuid.toString().split("-")[0]);
-        lobbyManager = new LobbyManager(this);
         world = new GameWorld(plugin.getSM().getVariables().gameSpawn, uuid.toString().split("-")[0]);
-        state = GameState.LOBBY;
-        players = new HashSet<>();
-        maxPlayers = plugin.getSM().getVariables().maxPlayers;
-        gameDuration = plugin.getSM().getVariables().gameDuration;
+        lobbyManager = new LobbyManager(this);
         jumpscareManager = new JumpscareManager(plugin, this);
         soundManager = new SoundManager(plugin, this);
+        maxPlayers = plugin.getSM().getVariables().maxPlayers;
+        gameDuration = plugin.getSM().getVariables().gameDuration;
+        players = new HashSet<>();
         countdownTasks = new HashMap<>();
         repeatingTasks = new HashMap<>();
+        pageCooldown = new HashSet<>();
+        soundCooldown = new HashSet<>();
+        state = GameState.LOBBY;
     }
 
     public void start() {
@@ -97,7 +103,7 @@ public class Game {
         ender.getPlayer().sendTitle(CC.t("&6You are the &c&lEnder!"), CC.t("&7Hunt the humans"));
         ender.getPlayer().sendMessage(CC.t("&6You are the &c&lEnder!"));
         ender.getPlayer().sendMessage(CC.t("&6Hunt down humans and stare into their eyes! Use your abilities in your hotbar to help you."));
-        getCountdownTasks().put("enderrelease", new Countdown(plugin, 10, () -> {
+        getCountdownTasks().put("enderrelease", new Countdown(plugin, plugin.getSM().getVariables().enderReleaseCountdown, () -> {
         }, () -> {
             ender.setFrozen(false);
             ender.getPlayer().setExp(0);
@@ -109,12 +115,10 @@ public class Game {
                 sound = true;
             }
             boolean finalSound = sound;
-            getPlayers().forEach(pp -> {
-                pp.getPlayer().setLevel((int) t.getSecondsLeft());
-                pp.getPlayer().setExp(t.getSecondsLeft() / t.getTotalSeconds());
-                if (finalSound)
-                    pp.getPlayer().playSound(pp.getPlayer().getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.75f, 1f);
-            });
+            ender.getPlayer().setLevel((int) t.getSecondsLeft());
+            ender.getPlayer().setExp(t.getSecondsLeft() / t.getTotalSeconds());
+            if (finalSound)
+                ender.getPlayer().playSound(ender.getPlayer().getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.75f, 1f);
         }).scheduleTimer());
         new BukkitRunnable() {
             @Override
@@ -213,7 +217,8 @@ public class Game {
     }
 
     private void handleJumpscares() {
-        new BukkitRunnable() {
+        long randomPeriod = new Random().nextInt(120 - 40) + 40;
+        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, new Runnable() {
             @Override
             public void run() {
                 if (!getState().equals(GameState.INGAME)) return;
@@ -225,30 +230,31 @@ public class Game {
                 else random = new Random().nextInt(humans.size() - 1) + 1;
                 for (int i = 0; i < random; i++)
                     jumpscare.execute(RandomUtils.getRandom(humans).getPlayer());
+
+                long randomPeriod = new Random().nextInt(90 - 20) + 20;
+                plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, this, randomPeriod * 20);
             }
-        }.runTaskTimerAsynchronously(plugin, 30 * 20, (new Random().nextInt(60 - 20) + 20) * 20);
+        }, randomPeriod * 20);
     }
 
     private void handleSounds() {
         repeatingTasks.put("sounds", new BukkitRunnable() {
             @Override
             public void run() {
+                if (!getState().equals(GameState.INGAME)) cancel();
                 getPlayers().stream().filter(p -> !soundManager.isPlayingSound(p.getPlayer())).forEach(p -> soundManager.playRandomAmbient(p.getPlayer()));
             }
         }.runTaskTimerAsynchronously(plugin, (30 * 20), 90));
-
-
-        // TODO play certain sounds when player is at certain places
-
     }
 
     private void handlePages() {
         repeatingTasks.put("pages", new BukkitRunnable() {
             @Override
             public void run() {
-                if (!getState().equals(GameState.INGAME)) return;
+                if (!getState().equals(GameState.INGAME)) cancel();
                 for (int i = 0; i < 5; i++) {
                     try {
+                        /*
                         ItemStack map = new ItemStack(Material.FILLED_MAP, 1);
                         Location location = pageManager.getRandomLocation();
                         if (!location.getBlock().getType().equals(Material.AIR)) return;
@@ -266,6 +272,17 @@ public class Game {
                             @Override
                             public void run() {
                                 frame.remove();
+                                frame.setItemDropChance(0);
+                            }
+                        }.runTaskLater(plugin, 15 * 20);
+                         */
+                        ItemFrame frame = pageManager.getRandomFrame();
+                        ItemStack map = pageManager.getItemFrames().get(frame);
+                        frame.setItem(map, false);
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                frame.setItem(new ItemStack(Material.AIR), false);
                             }
                         }.runTaskLater(plugin, 15 * 20);
                     } catch (IllegalArgumentException ex) {
@@ -280,53 +297,20 @@ public class Game {
         repeatingTasks.put("damage", new BukkitRunnable() {
             @Override
             public void run() {
-                if (!getState().equals(GameState.INGAME)) return;
-
-                /*
-                RayTraceResult result = world.getGameWorld().rayTraceEntities(ender.getPlayer().getEyeLocation(), ender.getPlayer().getEyeLocation().getDirection(), 5);
-                if (result == null) return;
-                Entity target = result.getHitEntity();
-                if (target == null) return;
-                if (!(target instanceof Player)) return;
-                RayTraceResult result2 = world.getGameWorld().rayTraceEntities(((Player) target).getEyeLocation(), ((Player) target).getEyeLocation().getDirection(), 3);
-                if (result2 == null) return;
-                Entity target2 = result2.getHitEntity();
-                if (target2 == null) return;
-                if (!(target2 instanceof Player)) return;
-                if (((Player) target2) != ender.getPlayer()) return;
-                 */
-
-                /*
-                double distance = 5;
-                org.bukkit.util.Vector eS = ender.getPlayer().getEyeLocation().toVector();
-                org.bukkit.util.Vector eD = ender.getPlayer().getEyeLocation().getDirection();
-                org.bukkit.util.Vector eE = eS.add(new org.bukkit.util.Vector(eD.getX() * distance, eD.getY() * distance, eD.getZ() * distance));
-                Set<Player> targets = new HashSet<>();
-                List<Entity> nearby = ender.getPlayer().getNearbyEntities(distance * 2, distance * 2, distance * 2);
-                nearby.forEach(entity -> {
-                    if (!(entity instanceof Player)) return;
-                    Player target = (Player) entity;
-                    org.bukkit.util.Vector tS = target.getEyeLocation().toVector();
-                    org.bukkit.util.Vector tD = target.getEyeLocation().getDirection();
-                    org.bukkit.util.Vector tE = tS.add(new org.bukkit.util.Vector(tD.getX() * distance, tD.getY() * distance, tD.getZ() * distance));
-                    if (tE.isInAABB(eS, eE))
-                        targets.add(target);
-                });
-                 */
-
+                if (!getState().equals(GameState.INGAME)) cancel();
                 Entity target = ender.getPlayer().getTargetEntity(5, false);
                 if (target == null) return;
                 if (!(target instanceof Player)) return;
-                Entity target2 = ((Player) target).getTargetEntity(3, false);
+                Entity target2 = ((Player) target).getTargetEntity(4, false);
+                if (target2 == null) target2 = target.getNearbyEntities(4, 1, 4).stream().findAny().orElse(null);
                 if (target2 == null) return;
                 if (!(target2 instanceof Player)) return;
                 if (((Player) target2) != ender.getPlayer()) return;
+                Entity finalTarget = target;
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        // targets.forEach(target -> target.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20, 2)));
-                        ((Player) target).addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20, 2));
-                        // ((Player) target).damage(1);
+                        ((Player) finalTarget).addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20, 2));
                     }
                 }.runTask(plugin);
             }
@@ -338,8 +322,10 @@ public class Game {
         setGameState(GameState.POSTGAME);
         switch (reason) {
             case TIME_UP:
-                broadcast("&6The time is up!");
-                broadcast("&c&lNobody &r&6has won the game.");
+                broadcast("&7-----------------------------------");
+                broadcast("&eThe Ender &awon the game!");
+                broadcast("&7The humans didn't find all pages in time.");
+                broadcast("&7-----------------------------------");
                 break;
             case PAGES_FOUND:
                 broadcast("&7-----------------------------------");
@@ -370,40 +356,48 @@ public class Game {
         new BukkitRunnable() {
             @Override
             public void run() {
-                countdownTasks.values().forEach(Countdown::cancel);
-                repeatingTasks.values().forEach(BukkitTask::cancel);
                 try {
                     if (enderTeam != null) enderTeam.unregister();
+                } catch (Exception ignored) {
+                }
+                try {
                     if (humansTeam != null) humansTeam.unregister();
+                } catch (Exception ignored) {
+                }
+                try {
                     if (bossBar != null) {
                         bossBar.removeAll();
                         bossBar.hide();
                         plugin.getServer().removeBossBar(new NamespacedKey(plugin, "ender_" + uuid));
                     }
+                } catch (Exception ignored) {
+                }
+                try {
                     gameScoreboard.getObjectives().forEach(Objective::unregister);
                 } catch (Exception ignored) {
                 }
-                for (EnderPlayer p : getPlayers()) {
-                    p.setTorch(null);
-                    p.setEnder(false);
-                    p.getPlayer().getInventory().clear();
-                    p.getPlayer().setExp(0);
-                    p.getPlayer().setLevel(0);
-                    p.getPlayer().getActivePotionEffects().forEach(pe -> p.getPlayer().removePotionEffect(pe.getType()));
-                    p.getPlayer().setGameMode(GameMode.SURVIVAL);
-                    p.getPlayer().setFoodLevel(20);
-                    p.getPlayer().setHealth(p.getPlayer().getMaxHealth());
-                    p.getPlayer().setScoreboard(plugin.getServer().getScoreboardManager().getNewScoreboard());
-                    p.getPlayer().getInventory().clear();
-                    p.getPlayer().getActivePotionEffects().forEach(pe -> p.getPlayer().removePotionEffect(pe.getType()));
-                    p.getPlayer().teleport(plugin.getSM().getVariables().serverLobby);
-                    // p.getPlayer().setResourcePack("https://www.dropbox.com/s/swf39bbwjqogyj4/empty.zip?dl=1");
+                try {
+                    for (EnderPlayer p : getPlayers()) {
+                        p.getPlayer().getInventory().clear();
+                        p.getPlayer().setExp(0);
+                        p.getPlayer().setLevel(0);
+                        p.getPlayer().getActivePotionEffects().forEach(pe -> p.getPlayer().removePotionEffect(pe.getType()));
+                        p.getPlayer().setGameMode(GameMode.SURVIVAL);
+                        p.getPlayer().setFoodLevel(20);
+                        p.getPlayer().setHealth(p.getPlayer().getMaxHealth());
+                        p.getPlayer().stopSound(SoundStop.all());
+                        plugin.sendToServer(p.getPlayer(), plugin.getSM().getVariables().hubServer);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-                getPlayers().clear();
-                world.deleteGameWorld();
+                CompletableFuture.runAsync(() -> {
+                    world.deleteGameWorld();
+                }).thenRun(() -> {
+                    plugin.getServer().shutdown();
+                });
             }
         }.runTask(plugin);
-        plugin.getSM().getGameManager().removeGame(this);
     }
 
     public UUID getUUID() {
@@ -476,6 +470,10 @@ public class Game {
 
     public void setEnder(EnderPlayer target) {
         ender = target;
+    }
+
+    public SoundManager getSoundManager() {
+        return soundManager;
     }
 
 }

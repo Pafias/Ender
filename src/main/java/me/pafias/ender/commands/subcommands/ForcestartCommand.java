@@ -30,7 +30,7 @@ public class ForcestartCommand extends ICommand {
             return;
         }
         EnderPlayer player = plugin.getSM().getPlayerManager().getPlayer((Player) sender);
-        Game game = plugin.getSM().getGameManager().getGame(player);
+        Game game = plugin.getSM().getGameManager().getGame();
         if (game == null) {
             sender.sendMessage(CC.t("&cYou are not in a game!"));
             return;

@@ -21,6 +21,8 @@ public class EnderCommand implements CommandExecutor {
         commands.add(new StopCommand());
         commands.add(new SetpowerCommand());
         commands.add(new SetenderCommand());
+        commands.add(new CreateCommand());
+        commands.add(new JoinCommand());
     }
 
     private Set<ICommand> commands = new HashSet<>();
